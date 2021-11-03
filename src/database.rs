@@ -1253,6 +1253,39 @@ impl Database {
         Ok(())
     }
 
+    pub fn reserve<'txn, A>(
+        &self,
+        txn: &'txn mut RwTxn,
+        key: A,
+        size: u32,
+    ) -> Result<&'txn mut [u8]>
+    where
+        A: AsRef<[u8]>,
+    {
+        assert_eq!(self.env_ident, txn.txn.env.env_mut_ptr() as usize);
+
+        let mut key_val = unsafe { crate::into_val(key.as_ref()) };
+        let mut data_val = lmdb_sys::MDB_val {
+            mv_data: ptr::null_mut(),
+            mv_size: size as usize,
+        };
+        let flags = ffi::MDB_RESERVE;
+
+        unsafe {
+            mdb_result(ffi::mdb_put(
+                txn.txn.txn,
+                self.dbi,
+                &mut key_val,
+                &mut data_val,
+                flags,
+            ))?
+        }
+
+        let reserved = unsafe { crate::from_val_mut(data_val) };
+        reserved.fill(0);
+        Ok(reserved)
+    }
+
     /// Append the given key/data pair to the end of the database.
     ///
     /// This option allows fast bulk loading when keys are already known to be in the correct order.

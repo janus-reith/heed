@@ -58,7 +58,7 @@ pub use self::iter::{RoIter, RoRevIter, RwIter, RwRevIter};
 pub use self::iter::{RoPrefix, RoRevPrefix, RwPrefix, RwRevPrefix};
 pub use self::iter::{RoRange, RoRevRange, RwRange, RwRevRange};
 pub use self::mdb::error::Error as MdbError;
-use self::mdb::ffi::{from_val, into_val};
+use self::mdb::ffi::{from_val, from_val_mut, into_val};
 pub use self::mdb::flags;
 pub use self::txn::{RoTxn, RwTxn};
 
